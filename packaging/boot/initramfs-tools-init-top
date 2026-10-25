@@ -1,0 +1,16 @@
+#!/bin/sh
+# Load gpu_unlock before init-top/udev coldplugs the cards: an nvidia in the
+# initramfs would bind them before load_modules gets to /conf/modules. With
+# no PREREQ this sorts ahead of udev. The modules.d drop-in puts the module
+# and its firmware in the image. It does nothing unless gpu_unlock.targets=
+# is on the kernel command line.
+PREREQ=""
+prereqs() { echo "$PREREQ"; }
+case "$1" in
+prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+modprobe -q gpu_unlock || true

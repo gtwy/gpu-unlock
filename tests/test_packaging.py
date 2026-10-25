@@ -2,6 +2,7 @@
 """Check the generated payload and the shared install layout."""
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -33,6 +34,7 @@ class PackageTests(unittest.TestCase):
                              f"usr/src/gpu-unlock-{version}/main.c",
                              "etc/mkinitcpio.conf.d/zz-gpu-unlock.conf",
                              "usr/share/initramfs-tools/modules.d/gpu-unlock.conf",
+                             "usr/share/initramfs-tools/scripts/init-top/gpu-unlock",
                              "usr/lib/dracut/dracut.conf.d/gpu-unlock.conf",
                              "usr/share/doc/gpu-unlock/README.md"):
                 self.assertIn(expected, paths)
@@ -47,6 +49,16 @@ class PackageTests(unittest.TestCase):
                 result = subprocess.run(["bash", "-c", f"MODULES=({before}); . {dropin}; echo ${{MODULES[*]}}"],
                                         capture_output=True, text=True, check=True)
                 self.assertEqual(result.stdout.strip(), after)
+            # initramfs-tools runs init-top scripts in tsort order of their
+            # PREREQs. Neither ours nor udev's has any, so ours must sort
+            # first to load gpu_unlock before udev's coldplug loads nvidia.
+            script = root / "usr/share/initramfs-tools/scripts/init-top/gpu-unlock"
+            self.assertTrue(os.access(script, os.X_OK))
+            result = subprocess.run([script, "prereqs"], capture_output=True, text=True, check=True)
+            self.assertEqual(result.stdout.strip(), "")
+            result = subprocess.run(["tsort"], input="udev udev\ngpu-unlock gpu-unlock\n",
+                                    capture_output=True, text=True, check=True)
+            self.assertEqual(result.stdout.split(), ["gpu-unlock", "udev"])
 
     def test_pkgbuild_pins_match_manifest(self):
         manifest = json.loads((ROOT / "firmware/artifacts-610.43.03.json").read_text())

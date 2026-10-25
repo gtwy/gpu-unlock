@@ -74,14 +74,18 @@ install-firmware:
 	install -Dm644 $(ASSETS)/NVIDIA-LICENSE $(DESTDIR)$(LICENSEDIR)/gpu-unlock-firmware/NVIDIA-LICENSE
 	install -Dm644 firmware/NOTICE.md $(DESTDIR)$(LICENSEDIR)/gpu-unlock-firmware/NOTICE.md
 
-# One file per initramfs generator: include gpu_unlock and its firmware in
+# One drop-in per initramfs generator: include gpu_unlock and its firmware in
 # the image so it runs before an nvidia module loaded from the initramfs.
+# initramfs-tools loads its modules.d list only after udev's coldplug, so it
+# also gets an init-top script that loads gpu_unlock ahead of udev.
 install-mkinitcpio:
 	install -Dm644 packaging/boot/mkinitcpio.conf $(DESTDIR)/etc/mkinitcpio.conf.d/zz-gpu-unlock.conf
 
 install-initramfs-tools:
 	install -Dm644 packaging/boot/initramfs-tools.conf \
 		$(DESTDIR)/usr/share/initramfs-tools/modules.d/gpu-unlock.conf
+	install -Dm755 packaging/boot/initramfs-tools-init-top \
+		$(DESTDIR)/usr/share/initramfs-tools/scripts/init-top/gpu-unlock
 
 install-dracut:
 	install -Dm644 packaging/boot/dracut.conf $(DESTDIR)/usr/lib/dracut/dracut.conf.d/gpu-unlock.conf

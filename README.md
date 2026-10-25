@@ -124,8 +124,10 @@ last and still runs before an `nvidia` loaded from the root filesystem.
 Images are rebuilt on install. mkinitcpio ignores drop-ins for an image
 built with `-c <config>` or a preset `_config`; put `gpu_unlock` right
 before `nvidia` in that config's `MODULES` yourself.
-- **initramfs-tools:** `/usr/share/initramfs-tools/modules.d/gpu-unlock.conf`.
-- **dracut:** `/usr/lib/dracut/dracut.conf.d/gpu-unlock.conf`.
+- **initramfs-tools:** `/usr/share/initramfs-tools/modules.d/gpu-unlock.conf`,
+loaded ahead of udev by `scripts/init-top/gpu-unlock`.
+- **dracut:** `/usr/lib/dracut/dracut.conf.d/gpu-unlock.conf`. The Debian
+package ships this too, since Ubuntu 25.10 and later use dracut.
 
 With initramfs-tools and dracut, the module is built for every installed
 kernel that has headers, and those kernels' images are rebuilt on install
