@@ -1,24 +1,42 @@
-# GPU unlock 1.0.0
+# About this fork
 
-> **This is a fork.** The official project is
-> [Zagitta/gpu-unlock](https://github.com/Zagitta/gpu-unlock). Report issues,
-> compatibility results and contributions there. This fork is upstream
-> [`af28cbb`](https://github.com/Zagitta/gpu-unlock/commit/af28cbb) plus two
-> boot-order fixes that upstream hadn't merged yet:
->
-> - **Ubuntu 25.10+ / dracut** ([upstream PR #26](https://github.com/Zagitta/gpu-unlock/pull/26)):
->   the Debian package now ships the dracut drop-in. Without it, `gpu_unlock`
->   never reaches the initramfs on Ubuntu 25.10 and later, and the unlock silently does nothing.
-> - **Ubuntu load order** ([upstream issue #11](https://github.com/Zagitta/gpu-unlock/issues/11),
->   Zagitta's `fix-ubuntu-load-order` branch): on initramfs-tools systems,
->   `gpu_unlock` now loads ahead of udev, so `nvidia` can't bind the card first.
->
-> Install from this fork the same way as upstream, but clone this repo (see
-> [How to install](#how-to-install)). After rebooting, check that the module
-> is in your boot image (`lsinitrd | grep gpu_unlock` on dracut,
-> `lsinitramfs /boot/initrd.img-$(uname -r) | grep gpu_unlock` on
-> initramfs-tools) and that `sudo dmesg | grep gpu_unlock` shows it ran.
-> Once upstream merges these fixes, use upstream instead.
+This is a fork of [Zagitta/gpu-unlock](https://github.com/Zagitta/gpu-unlock), which is the official project. Please send issues, compatibility reports and contributions there.
+
+This fork is upstream [`af28cbb`](https://github.com/Zagitta/gpu-unlock/commit/af28cbb) plus two boot-order fixes that upstream hasn't merged yet:
+
+- **Ubuntu 25.10+ / dracut** ([upstream PR #26](https://github.com/Zagitta/gpu-unlock/pull/26)): the Debian package now ships the dracut drop-in. Without it, `gpu_unlock` never reaches the initramfs on Ubuntu 25.10 and later, and the unlock silently does nothing.
+- **Ubuntu load order** ([upstream issue #11](https://github.com/Zagitta/gpu-unlock/issues/11), from Zagitta's `fix-ubuntu-load-order` branch): on initramfs-tools systems, `gpu_unlock` now loads ahead of udev, so `nvidia` can't bind the card first.
+
+Once upstream merges these fixes, use upstream instead.
+
+## Installing from this fork
+
+Follow [How to install](#how-to-install) below. The clone URL there already points at this fork:
+
+```sh
+git clone https://github.com/gtwy/gpu-unlock
+cd gpu-unlock
+make install
+```
+
+Then add `gpu_unlock.targets=all` to your kernel command line as described below, and reboot.
+
+## Checking it worked
+
+Confirm the module is in your boot image:
+
+```sh
+# dracut (Ubuntu 25.10 and later)
+sudo lsinitrd | grep gpu_unlock
+# initramfs-tools (older Ubuntu)
+lsinitramfs /boot/initrd.img-$(uname -r) | grep gpu_unlock
+```
+
+Then confirm it ran at boot with `sudo dmesg | grep gpu_unlock`.
+
+---
+
+# GPU unlock 1.0.0
 
 Unlock FP/BF16 instruction issue rate on Nvidia 3000's cards to their professional equivalents
 
