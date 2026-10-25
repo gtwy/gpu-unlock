@@ -1,5 +1,25 @@
 # GPU unlock 1.0.0
 
+> **This is a fork.** The official project is
+> [Zagitta/gpu-unlock](https://github.com/Zagitta/gpu-unlock). Report issues,
+> compatibility results and contributions there. This fork is upstream
+> [`af28cbb`](https://github.com/Zagitta/gpu-unlock/commit/af28cbb) plus two
+> boot-order fixes that upstream hadn't merged yet:
+>
+> - **Ubuntu 25.10+ / dracut** ([upstream PR #26](https://github.com/Zagitta/gpu-unlock/pull/26)):
+>   the Debian package now ships the dracut drop-in. Without it, `gpu_unlock`
+>   never reaches the initramfs on Ubuntu 25.10 and later, and the unlock silently does nothing.
+> - **Ubuntu load order** ([upstream issue #11](https://github.com/Zagitta/gpu-unlock/issues/11),
+>   Zagitta's `fix-ubuntu-load-order` branch): on initramfs-tools systems,
+>   `gpu_unlock` now loads ahead of udev, so `nvidia` can't bind the card first.
+>
+> Install from this fork the same way as upstream, but clone this repo (see
+> [How to install](#how-to-install)). After rebooting, check that the module
+> is in your boot image (`lsinitrd | grep gpu_unlock` on dracut,
+> `lsinitramfs /boot/initrd.img-$(uname -r) | grep gpu_unlock` on
+> initramfs-tools) and that `sudo dmesg | grep gpu_unlock` shows it ran.
+> Once upstream merges these fixes, use upstream instead.
+
 Unlock FP/BF16 instruction issue rate on Nvidia 3000's cards to their professional equivalents
 
 This Linux kernel module combines the CMP unlocker's V67/PLM technique with the pre-driver timing of the UEFI approach. It runs the unlock, writes the speed selectors (SS0 `0x88888888`, which selects the full BF16 rate, and the 4-bit SS1 `0x8` IMLA4) and performs FLR before the unmodified NVIDIA driver binds the card. It is neither a UEFI application nor a patched NVIDIA driver. 
@@ -62,7 +82,7 @@ display, and cards passed through to a VM with vfio-pci
 First run:
 
 ```sh
-git clone https://github.com/Zagitta/gpu-unlock
+git clone https://github.com/gtwy/gpu-unlock
 cd gpu-unlock
 make install
 ```
